@@ -165,30 +165,8 @@ fn convert_arg(arg: &OsStr) -> String {
 /// but this failed to have effect when building a `build.rs` file.
 /// This wasn't used anywhere but passing down here, so we've just migrated
 /// the code to find the sysroot path directly into this function.
-fn sysroot_path(sysroot_arg: Option<&str>) -> PathBuf {
-    // rustup sets some environment variables during build, but this is not clearly documented.
-    // https://github.com/rust-lang/rustup/blob/master/src/toolchain.rs (search for RUSTUP_HOME)
-    // We're using RUSTUP_TOOLCHAIN here, which is going to be set by our `rust-toolchain.toml` file.
-    // This is a *compile-time* constant, not a dynamic lookup at runtime, so this is reliable.
-    let toolchain = env!("RUSTUP_TOOLCHAIN");
-
-    let path = if let Some(s) = sysroot_arg {
-        PathBuf::from(s)
-    } else {
-        // We use the home crate to do a *runtime* determination of where rustup toolchains live
-        let rustup = home::rustup_home().expect("Couldn't find RUSTUP_HOME");
-        rustup.join("toolchains").join(toolchain)
-    };
-    // If we ever have a problem with the above not being good enough, we can consider a third heuristic
-    // for finding our sysroot: readlink() on `../toolchain` from the location of our executable.
-    // At time of writing this would only work for release, not development, however, so I'm not going
-    // with this option yet. It would eliminate the need for the `home` crate however.
-
-    if !path.exists() {
-        panic!("Couldn't find Kani Rust toolchain {}. Tried: {}", toolchain, path.display());
-    }
-    tracing::debug!(?path, ?sysroot_arg, "Sysroot path.");
-    path
+fn sysroot_path(_sysroot_arg: Option<&str>) -> PathBuf {
+    PathBuf::from(env!("TOOLCHAIN"))
 }
 
 #[cfg(test)]
