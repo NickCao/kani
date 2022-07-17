@@ -86,3 +86,6 @@ tests/kani-multicrate/type-mismatch/mismatch/target
 /docs/book
 /docs/mdbook*
 /kani-*.tar.gz
+
+/.envrc
+/.direnv/
